@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tenis - gra w canvas</title>
+</head>
+<body>
+    <style>
+        body{
+            margin: 0px;
+            padding: 0px;
+            display: flex;
+            height: 100vh;
+            align-items: center;
+            justify-content: center;
+            background-color: gray;            
+        }
+        
+        canvas{
+           border: 3px solid white;
+        }
+        
+        #wynik{
+            margin: 50px;
+            border: 3px solid white;
+        }
+        
+    </style>
+    
+    <canvas>
+        
+    </canvas>
+    
+    <script>
+        const canv=document.querySelector('canvas');
+        const ctx=canv.getContext('2d');
+        canv.width =1000;
+        canv.height=500;
+        const cw=canv.width;
+        const ch=canv.height;
+        const ballSize=20;//wielkość piłki
+        let ballX=cw/2-ballSize/2;
+        let ballY=ch/2-ballSize/2;
+        let ballSpeedX=3;
+        let ballSpeedY=3;
+        const border=3;
+        let koniec=false;
+        const paddleHight=100;
+        const halfpaddle=paddleHight/2;
+        const paddleWidth=20;
+        const playerX=70;
+        const aiX=910;
+        let playerY=200;
+        let aiY=200;
+      
+        let topCanvas=canv.offsetTop;
+        const lineWidth=6;
+        const lineHight=16;
+        
+        
+        function speedUp()
+        {   if(ballSpeedX>0 && ballSpeedX<16){
+             ballSpeedX=ballSpeedX*(1.005);
+            ballSpeedY=ballSpeedY*(1.005);}
+            if(ballSpeedX<0 && ballSpeedX>-16){
+            //console.log("przyspieszenie");
+            ballSpeedX=ballSpeedX*(1.005);
+            ballSpeedY=ballSpeedY*(1.005);}
+        }
+        odbicie();
+        
+        function ball(){ctx.fillStyle="white";
+            ctx.fillRect(ballX,ballY,ballSize,ballSize);
+           
+            if(ballX>90 && (ballX+ballSpeedX)<90){ballX=90;}else if((ballX+ballSize)<910 && (ballX+ballSize+ballSpeedX)>910){ballX=890;}else{ballX+=ballSpeedX;}            
+            
+            ballY+=ballSpeedY;  
+            
+                if(ballY<=0 || ballY+ballSize>= ch)
+                {
+                    ballSpeedY=ballSpeedY*(-1);
+                    speedUp();
+                    
+                }
+                 if(ballX<=0 || ballX+ballSize>= cw)
+                {   koniec=true;
+                    ballSpeedX=ballSpeedX*(-1);
+                    speedUp();
+                }
+                        odbicie();
+                       }
+        function playerPosition(e){
+             playerY=e.clientY-topCanvas-halfpaddle;
+            //console.log(topCanvas);
+            if(playerY<=0)
+             { playerY=0
+            }
+         if(playerY>=(ch-paddleHight))
+             {playerY=ch-paddleHight}
+            
+        }
+        
+       
+        
+        canv.addEventListener("mousemove",playerPosition );
+        
+        
+        
+        function player(){
+            ctx.fillStyle="red";
+            ctx.fillRect(playerX, playerY,paddleWidth,paddleHight);
+            //ctx.fillRect(aiX, aiY,paddleWidth,paddleHight);
+                        }
+    
+         function aI(){
+            ctx.fillStyle="yellow";
+            ctx.fillRect(aiX, aiY,paddleWidth,paddleHight);
+                        }
+        
+        function table(){
+            ctx.fillStyle="black";
+            ctx.fillRect(0,0 ,cw,ch);
+             ctx.fillStyle="gray";
+           for(let linePosition=0; linePosition<= ch; linePosition+=lineHight){
+              ctx.fillRect(cw/2-lineWidth/2,linePosition,lineWidth,lineHight);
+              linePosition+=12;  
+                          }
+            
+                        }
+        
+  
+         function aiPosition(){
+           var  middleBall=ballY+ballSize/2;
+           var  middlePadleAi=aiY+halfpaddle;            
+            if(ballX>cw/2){
+                if((middlePadleAi-middleBall)>150) {
+                  aiY-=15;
+                }else if((middlePadleAi-middleBall)<=150 && (middlePadleAi-middleBall)>30){
+                    aiY-=5;
+                }else if((middleBall-middlePadleAi)>150) {
+                  aiY+=15;
+                }else if((middleBall-middlePadleAi)<=150 && (middleBall-middlePadleAi)>30){
+                    aiY+=5;
+                }                
+        }else if(ballX<=cw/2){
+             if((middlePadleAi-middleBall)>150) {
+                  aiY-=6;
+                }else if((middlePadleAi-middleBall)<=150 && (middlePadleAi-middleBall)>30){
+                    aiY-=2;
+                }else if((middleBall-middlePadleAi)>150) {
+                  aiY+=6;
+                }else if((middleBall-middlePadleAi)<=150 && (middleBall-middlePadleAi)>30){
+                    aiY+=2;
+                } 
+        }
+                
+              if(aiY<=0)
+             { aiY=0
+            }
+              if(aiY>=(ch-paddleHight))
+             {aiY=ch-paddleHight}
+         }
+        function odbicie(){
+                var  middleBall_1=ballY+ballSize/2;
+                var  middlePadlePlayer=playerY+halfpaddle; 
+                var  middlePadleAi_1=aiY+halfpaddle; 
+   
+             if(ballX==90){
+               if((middlePadlePlayer-middleBall_1)<=50 && (middlePadlePlayer-middleBall_1)>=(-50)){
+                ballSpeedX=ballSpeedX*(-1);
+                   console.log("odbicie");
+                    speedUp();
+                    }
+                    }else if((ballX+ballSize) == 910){
+               if((middlePadleAi_1-middleBall_1)<=50 && (middleBall_1-middleBall_1)>=(-50)){
+                ballSpeedX=ballSpeedX*(-1);
+                    speedUp();
+                    }
+                    }
+                    }
+     
+        
+        
+      function game(){  
+          if(!koniec){
+   table();
+   ball();
+   player();
+   aI();
+   aiPosition();
+      }else{alert("Odśwież stronę aby zagrać jeszcze raz!")}}
+       
+        setInterval(game,1000/60);
+        
+        
+    </script>
+    
+</body>
+</html>
